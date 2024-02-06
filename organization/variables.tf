@@ -11,3 +11,8 @@ variable "org_map" {
 variable "personal_email" {
     description = "Personal email so that we can use the same email for everything"
 }
+
+variable "policy" {
+  description = "Map of the policies and their json files and names"
+
+}

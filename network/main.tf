@@ -1,20 +1,27 @@
-resource "aws_iam_policy" "policy" {
-  name        = "test_policy"
-  path        = "/"
-  description = "My test policy"
+locals {
+  config = lookup(var.account_config, terraform.workspace)
+  east_1_networks = { for network in local.config.networks : replace(replace(replace("${network.region}_${network.cidr}", "-", "_"), "/", "_"), ".", "_")
+  => network if network.region == "us-east-1" }
+  east_2_networks = { for network in local.config.networks : replace(replace(replace("${network.region}_${network.cidr}", "-", "_"), "/", "_"), ".", "_")
+  => network if network.region == "us-east-2" }
+}
 
-  # Terraform's "jsonencode" function converts a
-  # Terraform expression result to valid JSON syntax.
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "ec2:Describe*",
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      },
-    ]
-  })
+module "regional_east1" {
+  source         = "./modules/region"
+  for_each       = local.east_1_networks
+  network        = each.value
+  account_config = local.config
+  providers = {
+    aws = aws.east1
+  }
+}
+
+module "regional_east2" {
+  source         = "./modules/region"
+  for_each       = local.east_2_networks
+  network        = each.value
+  account_config = local.config
+  providers = {
+    aws = aws.east2
+  }
 }

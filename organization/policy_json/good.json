@@ -1,0 +1,23 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1707177514163",
+            "Action": "sagemaker:*",
+            "Effect": "Deny",
+            "Resource": "*"
+        },
+        {
+            "Sid": "Stmt1707177558505",
+            "Action": "textract:*",
+            "Effect": "Deny",
+            "Resource": "*"
+        },
+        {
+            "Sid": "Stmt1707177695575",
+            "Action": "q:*",
+            "Effect": "Deny",
+            "Resource": "*"
+        }
+    ]
+}
