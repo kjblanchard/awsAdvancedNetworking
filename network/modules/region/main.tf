@@ -8,15 +8,29 @@ locals {
   subnets = flatten([
     for i in range(length(var.network.subnets)) : [
       for j in range(length(local.azs)) : {
-        name = replace("${var.network.subnets[i]}_${local.azs[j]}", "-", "_")
-        cidr = cidrsubnet(var.network.cidr, var.network.subnet_size, i * length(local.azs) + j)
-        az = local.azs[j]
+        name   = replace("${var.network.subnets[i].name}_${local.azs[j]}", "-", "_")
+        cidr   = cidrsubnet(var.network.cidr, var.network.subnet_size, i * length(local.azs) + j)
+        az     = local.azs[j]
+        public = try(var.network.subnets[i].public, false)
       }
     ]
   ])
+  private_subnets = [for subnet in local.subnets : subnet if !subnet.public]
+  public_subnets = [for subnet in local.subnets : subnet if subnet.public]
   tags = {
     Region : var.network.region
     Environment : var.account_config.environment
+  }
+  main_route_table_routes = {
+    main = {
+      cidr_block = "0.0.0.0/0"
+      gateway_id = aws_internet_gateway.gw.id
+    }
+    main_v6 = {
+      ipv6_cidr_block        = "::/0"
+      egress_only_gateway_id = aws_egress_only_internet_gateway.gwv6.id
+
+    }
   }
 }
 

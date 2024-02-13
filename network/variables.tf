@@ -9,11 +9,13 @@ variable "account_config" {
     name        = string
     environment = string
     networks = list(object({
+      enabled      = bool
       cidr        = string
       region      = string
-      subnets     = list(string)
+      subnets     = list(any)
       subnet_size = number
       azs         = number
+      pingbots    = bool
     }))
   }))
 }
