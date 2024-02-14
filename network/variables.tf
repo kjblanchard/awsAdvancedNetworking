@@ -15,7 +15,7 @@ variable "account_config" {
       subnets     = list(any)
       subnet_size = number
       azs         = number
-      pingbots    = bool
+      nat    = bool
     }))
   }))
 }

@@ -8,18 +8,22 @@ locals {
   subnets = flatten([
     for i in range(length(var.network.subnets)) : [
       for j in range(length(local.azs)) : {
-        name    = replace("${var.network.subnets[i].name}_${local.azs[j]}", "-", "_")
-        cidr    = cidrsubnet(var.network.cidr, var.network.subnet_size, i * length(local.azs) + j)
-        az      = local.azs[j]
-        public  = try(var.network.subnets[i].public, false)
-        bastion = try(var.network.subnets[i].bastion, false)
+        name       = replace("${var.network.subnets[i].name}_${local.azs[j]}", "-", "_")
+        cidr       = cidrsubnet(var.network.cidr, var.network.subnet_size, i * length(local.azs) + j)
+        az         = local.azs[j]
+        public     = try(var.network.subnets[i].public, false)
+        bastion    = try(var.network.subnets[i].bastion, false)
+        nat        = var.network.nat
+        pingbot    = try(var.network.subnets[i].pingbot, false)
+        nat_subnet = replace("public_${local.azs[j]}", "-", "_")
       }
     ]
   ])
   private_subnets = [for subnet in local.subnets : subnet if !subnet.public]
   public_subnets  = [for subnet in local.subnets : subnet if subnet.public]
   bastion_subnets = [for subnet in local.public_subnets : subnet if subnet.bastion]
-  # bastion_subnets_each = {for subnet in local.bastion_subnets: subnet.name => subnet}
+  nat_subnets     = { for subnet in local.public_subnets : subnet.name => subnet if subnet.nat }
+  pingbot_subnets = { for subnet in local.private_subnets : subnet.name => subnet if subnet.pingbot }
   tags = {
     Region : var.network.region
     Environment : var.account_config.environment
