@@ -8,20 +8,23 @@ locals {
   subnets = flatten([
     for i in range(length(var.network.subnets)) : [
       for j in range(length(local.azs)) : {
-        name   = replace("${var.network.subnets[i].name}_${local.azs[j]}", "-", "_")
-        cidr   = cidrsubnet(var.network.cidr, var.network.subnet_size, i * length(local.azs) + j)
-        az     = local.azs[j]
-        public = try(var.network.subnets[i].public, false)
+        name    = replace("${var.network.subnets[i].name}_${local.azs[j]}", "-", "_")
+        cidr    = cidrsubnet(var.network.cidr, var.network.subnet_size, i * length(local.azs) + j)
+        az      = local.azs[j]
+        public  = try(var.network.subnets[i].public, false)
+        bastion = try(var.network.subnets[i].bastion, false)
       }
     ]
   ])
   private_subnets = [for subnet in local.subnets : subnet if !subnet.public]
-  public_subnets = [for subnet in local.subnets : subnet if subnet.public]
+  public_subnets  = [for subnet in local.subnets : subnet if subnet.public]
+  bastion_subnets = [for subnet in local.public_subnets : subnet if subnet.bastion]
+  # bastion_subnets_each = {for subnet in local.bastion_subnets: subnet.name => subnet}
   tags = {
     Region : var.network.region
     Environment : var.account_config.environment
   }
-  main_route_table_routes = {
+  public_route_table_routes = {
     main = {
       cidr_block = "0.0.0.0/0"
       gateway_id = aws_internet_gateway.gw.id
@@ -32,5 +35,6 @@ locals {
 
     }
   }
+  private_route_table_routes = {}
 }
 

@@ -9,7 +9,7 @@ variable "account_config" {
     name        = string
     environment = string
     networks = list(object({
-      enabled      = bool
+      enabled     = bool
       cidr        = string
       region      = string
       subnets     = list(any)
@@ -19,3 +19,4 @@ variable "account_config" {
     }))
   }))
 }
+

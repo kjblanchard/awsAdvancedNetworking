@@ -18,8 +18,3 @@ variable "security_group_id" {
     default = ""
     description = "The security group to attach to this ec2, else none"
 }
-variable "key_pair" {
-    default = ""
-    description = "The Keypair to use"
-
-}
