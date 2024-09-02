@@ -9,11 +9,18 @@ locals {
   => network if network.region == "us-east-2" }
 }
 
+module "global" {
+  source = "./modules/global"
+  providers = {
+    aws = aws.east1
+  }
+}
+
 module "regional_east1" {
-  source         = "./modules/region"
-  for_each       = local.east_1_networks
-  network        = each.value
-  account_config = local.config
+  source                        = "./modules/region"
+  for_each                      = local.east_1_networks
+  network                       = each.value
+  account_config                = local.config
   pingbot_instance_profile_name = aws_iam_instance_profile.ssm_profile.id
   providers = {
     aws = aws.east1
@@ -21,10 +28,10 @@ module "regional_east1" {
 }
 
 module "regional_east2" {
-  source         = "./modules/region"
-  for_each       = local.east_2_networks
-  network        = each.value
-  account_config = local.config
+  source                        = "./modules/region"
+  for_each                      = local.east_2_networks
+  network                       = each.value
+  account_config                = local.config
   pingbot_instance_profile_name = aws_iam_instance_profile.ssm_profile.id
   providers = {
     aws = aws.east2
